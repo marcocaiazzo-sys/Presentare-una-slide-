@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parlare in pubblico con sicurezza</title>
+<style>
+  @import url('data:text/css,');
+
+  :root {
+    --navy:   #1E2D40;
+    --green:  #1D9E75;
+    --greenL: #E1F5EE;
+    --blue:   #378ADD;
+    --blueL:  #EBF4FD;
+    --amber:  #BA7517;
+    --amberL: #FEF3DC;
+    --purple: #534AB7;
+    --purpleL:#EEEDFE;
+    --cream:  #F7F5F0;
+    --white:  #FFFFFF;
+    --textD:  #1A1A2E;
+    --textM:  #4A5568;
+    --textL:  #718096;
+    --border: #E2E8F0;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--cream);
+    color: var(--textD);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--navy);
+    display: flex; align-items: center; gap: 0;
+    padding: 0 2rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+  }
+  .nav-logo {
+    font-size: 14px; font-weight: 700; color: var(--green);
+    letter-spacing: 0.08em; padding: 1rem 1.5rem 1rem 0;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    margin-right: 1rem; white-space: nowrap;
+    font-family: 'Courier New', monospace;
+  }
+  .nav-links { display: flex; gap: 0; flex-wrap: nowrap; overflow-x: auto; }
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.55); font-size: 13px;
+    padding: 1rem 1rem; transition: color .2s, background .2s;
+    white-space: nowrap; font-family: inherit;
+    border-bottom: 3px solid transparent;
+  }
+  .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+  .nav-btn.active { color: #fff; border-bottom-color: var(--green); }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: calc(100vh - 56px); }
+  .page.active { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--navy);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent, transparent 40px,
+      rgba(29,158,117,0.03) 40px, rgba(29,158,117,0.03) 80px
+    );
+  }
+  .hero-badge {
+    display: inline-block; background: rgba(29,158,117,0.15);
+    border: 1px solid rgba(29,158,117,0.4);
+    color: var(--green); font-size: 12px; letter-spacing: 0.1em;
+    padding: 5px 16px; border-radius: 20px; margin-bottom: 1.5rem;
+    font-family: 'Courier New', monospace;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    color: #fff; font-weight: 700; line-height: 1.15;
+    margin-bottom: 1rem; position: relative;
+  }
+  .hero h1 span { color: var(--green); }
+  .hero p {
+    font-size: 1.1rem; color: rgba(255,255,255,0.6);
+    max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7;
+    font-family: 'Georgia', serif;
+  }
+  .pillars-row {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  }
+  .pillar-badge {
+    padding: 8px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+    border: 1.5px solid; cursor: pointer;
+    transition: all .2s; font-family: sans-serif;
+  }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+  /* ── BLOCK CARDS ── */
+  .block-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--border); margin-bottom: 1.25rem;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .block-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.25rem 1.5rem; cursor: pointer;
+    transition: background .15s; user-select: none;
+  }
+  .block-header:hover { background: #fafafa; }
+  .block-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; flex-shrink: 0;
+    font-family: 'Georgia', serif;
+  }
+  .block-info { flex: 1; }
+  .block-title { font-size: 17px; font-weight: 700; }
+  .block-sub { font-size: 13px; color: var(--textL); margin-top: 2px; font-family: sans-serif; }
+  .block-chevron { font-size: 18px; color: var(--textL); transition: transform .25s; }
+  .block-chevron.open { transform: rotate(180deg); }
+  .block-body { display: none; padding: 0 1.5rem 1.5rem; border-top: 1px solid var(--border); }
+  .block-body.open { display: block; }
+  .block-intro { font-size: 15px; color: var(--textM); line-height: 1.75; padding: 1rem 0; }
+
+  /* ── GRID POINTS ── */
+  .points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1rem 0; }
+  @media(max-width:600px){ .points-grid { grid-template-columns: 1fr; } }
+  .point-card {
+    border-radius: 10px; padding: 1rem; border-left: 4px solid;
+  }
+  .point-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; font-family: sans-serif; }
+  .point-text { font-size: 14px; line-height: 1.6; font-family: sans-serif; color: var(--textD); }
+
+  /* ── TIP BOX ── */
+  .tip { border-radius: 10px; padding: 1rem 1.25rem; margin: 0.75rem 0; }
+  .tip-title { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; font-family: sans-serif; }
+  .tip-text { font-size: 14px; line-height: 1.65; font-family: sans-serif; }
+  .tip.green { background: var(--greenL); border-left: 4px solid var(--green); }
+  .tip.blue  { background: var(--blueL);  border-left: 4px solid var(--blue);  }
+  .tip.amber { background: var(--amberL); border-left: 4px solid var(--amber); }
+  .tip.green .tip-title { color: var(--green); }
+  .tip.blue  .tip-title { color: var(--blue);  }
+  .tip.amber .tip-title { color: var(--amber); }
+
+  /* ── ERRORI ── */
+  .err-table { margin: 1rem 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .err-row { display: grid; grid-template-columns: 40px 1fr; border-bottom: 1px solid var(--border); }
+  .err-row:last-child { border-bottom: none; }
+  .err-tag { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: sans-serif; }
+  .err-tag.no { background: #FEE2E2; color: #991B1B; }
+  .err-tag.si { background: #DCFCE7; color: #166534; }
+  .err-text { padding: 9px 12px; font-size: 13px; font-family: sans-serif; display: flex; align-items: center; }
+  .err-text.si { font-weight: 600; }
+
+  /* ── QUOTE ── */
+  .quote-block {
+    background: var(--navy); border-radius: var(--radius);
+    padding: 1.75rem; margin: 1rem 0; position: relative;
+  }
+  .quote-mark { font-size: 4rem; color: var(--blue); line-height: 0.5; margin-bottom: 0.5rem; display: block; }
+  .quote-text { font-size: 1.2rem; color: #fff; font-style: italic; line-height: 1.5; margin-bottom: 0.75rem; }
+  .quote-author { font-size: 13px; color: rgba(255,255,255,0.45); font-family: sans-serif; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 1.5rem; font-weight: 700; color: var(--textD);
+    margin: 2rem 0 1rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  /* ── QUIZ ── */
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+  .quiz-progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 1.5rem; overflow: hidden; }
+  .quiz-progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .4s ease; }
+  .quiz-counter { font-size: 13px; color: var(--textL); font-family: sans-serif; margin-bottom: 1rem; }
+  .quiz-q {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .quiz-question { font-size: 1.1rem; font-weight: 700; color: var(--textD); margin-bottom: 1.25rem; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt {
+    padding: 0.85rem 1.1rem; border-radius: 10px;
+    border: 1.5px solid var(--border); background: var(--cream);
+    font-size: 14px; font-family: sans-serif; color: var(--textD);
+    cursor: pointer; text-align: left; transition: all .15s;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--blue); background: var(--blueL); }
+  .quiz-opt.correct { background: var(--greenL); border-color: var(--green); color: #0F6E56; font-weight: 600; }
+  .quiz-opt.wrong   { background: #FEE2E2; border-color: #EF4444; color: #991B1B; }
+  .quiz-feedback {
+    margin-top: 1rem; padding: 0.9rem 1rem;
+    border-radius: 10px; font-size: 14px; font-family: sans-serif;
+    line-height: 1.6; display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: var(--greenL); color: #0F6E56; border-left: 4px solid var(--green); }
+  .quiz-feedback.ko { background: #FEE2E2; color: #991B1B; border-left: 4px solid #EF4444; }
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+  .quiz-score { font-size: 13px; font-family: sans-serif; color: var(--textL); }
+  .btn-next {
+    background: var(--navy); color: #fff; border: none;
+    padding: 10px 24px; border-radius: 8px; font-size: 14px;
+    cursor: pointer; font-family: sans-serif; transition: background .2s;
+    display: none;
+  }
+  .btn-next:hover { background: #2A3F58; }
+  .btn-next.show { display: block; }
+  .quiz-result {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2.5rem; text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .result-emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+  .result-score { font-size: 2.5rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+  .result-msg { font-size: 15px; color: var(--textM); font-family: sans-serif; line-height: 1.6; margin-bottom: 1.5rem; }
+  .btn-retry {
+    background: var(--green); color: #fff; border: none;
+    padding: 12px 28px; border-radius: 10px; font-size: 15px;
+    cursor: pointer; font-family: sans-serif; font-weight: 600;
+  }
+
+  /* ── PROVA TU ── */
+  .prova-wrap { max-width: 680px; margin: 0 auto; }
+  .prova-intro { font-size: 15px; color: var(--textM); font-family: sans-serif; line-height: 1.7; margin-bottom: 1.5rem; }
+  .select-row { margin-bottom: 1rem; }
+  .select-row label { display: block; font-size: 13px; font-family: sans-serif; color: var(--textL); margin-bottom: 6px; font-weight: 600; }
+  select, textarea {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--white); font-size: 14px; color: var(--textD);
+    font-family: sans-serif; transition: border-color .15s;
+  }
+  select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+  textarea { min-height: 100px; resize: vertical; }
+  .btn-check {
+    background: var(--blue); color: #fff; border: none;
+    padding: 11px 24px; border-radius: 10px; font-size: 14px;
+    cursor: pointer; font-family: sans-serif; font-weight: 600;
+    margin-top: 8px; transition: background .2s;
+  }
+  .btn-check:hover { background: #2a70c0; }
+  .prova-result {
+    margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 10px;
+    font-size: 14px; font-family: sans-serif; line-height: 1.6;
+    display: none;
+  }
+  .prova-result.show { display: block; }
+  .prova-result.ok { background: var(--greenL); border-left: 4px solid var(--green); color: #0F6E56; }
+  .prova-result.ko { background: #FEE2E2; border-left: 4px solid #EF4444; color: #991B1B; }
+  .hints-section { margin-top: 2rem; }
+  .hint-item {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 10px;
+    font-size: 13px; font-family: sans-serif; line-height: 1.55; color: var(--textM);
+  }
+  .hint-item strong { color: var(--textD); }
+
+  /* ── SFIDE ── */
+  .sfide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:600px){ .sfide-grid { grid-template-columns: 1fr; } }
+  .sfida-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem;
+    box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s;
+  }
+  .sfida-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.1); }
+  .sfida-icon { font-size: 28px; margin-bottom: 0.6rem; }
+  .sfida-title { font-size: 15px; font-weight: 700; margin-bottom: 0.5rem; }
+  .sfida-text { font-size: 13px; color: var(--textM); line-height: 1.6; font-family: sans-serif; }
+
+  /* ── AGENDA ── */
+  .agenda-row {
+    display: flex; align-items: stretch; gap: 0;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+  .agenda-accent { width: 8px; flex-shrink: 0; }
+  .agenda-num { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; font-family: 'Georgia', serif; }
+  .agenda-info { flex: 1; padding: 1rem; }
+  .agenda-ttl { font-size: 16px; font-weight: 700; }
+  .agenda-time { font-size: 12px; color: var(--textL); margin-top: 3px; font-family: sans-serif; }
+  .agenda-go { padding: 1rem; display: flex; align-items: center; }
+  .agenda-go button {
+    background: none; border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 6px 14px; font-size: 12px;
+    cursor: pointer; font-family: sans-serif; color: var(--textM);
+    transition: all .15s;
+  }
+  .agenda-go button:hover { border-color: var(--navy); color: var(--navy); background: var(--cream); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,0.4);
+    text-align: center; padding: 1.5rem; font-size: 12px;
+    font-family: sans-serif; margin-top: 3rem;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .page.active .container > * { animation: fadeUp .35s ease both; }
+  .page.active .container > *:nth-child(1) { animation-delay: 0s; }
+  .page.active .container > *:nth-child(2) { animation-delay: .05s; }
+  .page.active .container > *:nth-child(3) { animation-delay: .1s; }
+  .page.active .container > *:nth-child(4) { animation-delay: .15s; }
+  .page.active .container > *:nth-child(5) { animation-delay: .2s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">ELOQUIO</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="goPage('home',this)">Home</button>
+    <button class="nav-btn" onclick="goPage('lezione',this)">Lezione</button>
+    <button class="nav-btn" onclick="goPage('quiz',this)">Quiz</button>
+    <button class="nav-btn" onclick="goPage('prova',this)">Prova tu</button>
+    <button class="nav-btn" onclick="goPage('sfide',this)">Sfide</button>
+  </div>
+</nav>
+
+<!-- ══════════════ PAGE: HOME ══════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-badge">LEZIONE · 2 ORE · SCUOLA MEDIA</div>
+    <h1>Parlare in pubblico<br><span>con sicurezza</span></h1>
+    <p>Come presentare le slide in modo chiaro e convincente. Quattro blocchi, tanti esempi pratici e un quiz per verificare quello che hai imparato.</p>
+    <div class="pillars-row">
+      <div class="pillar-badge" style="color:var(--green);border-color:var(--green);background:rgba(29,158,117,0.1)" onclick="goBlock('struttura')">01 · Struttura</div>
+      <div class="pillar-badge" style="color:var(--blue);border-color:var(--blue);background:rgba(55,138,221,0.1)" onclick="goBlock('voce')">02 · Voce</div>
+      <div class="pillar-badge" style="color:var(--amber);border-color:var(--amber);background:rgba(186,117,23,0.1)" onclick="goBlock('corpo')">03 · Corpo</div>
+      <div class="pillar-badge" style="color:var(--purple);border-color:var(--purple);background:rgba(83,74,183,0.1)" onclick="goBlock('ansia')">04 · Ansia</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section-title">Programma della lezione</div>
+
+    <div class="agenda-row">
+      <div class="agenda-accent" style="background:var(--green)"></div>
+      <div class="agenda-num" style="color:var(--green)">01</div>
+      <div class="agenda-info">
+        <div class="agenda-ttl">Come strutturare un discorso</div>
+        <div class="agenda-time">0:00 – 0:25 · 25 minuti</div>
+      </div>
+      <div class="agenda-go"><button onclick="goBlock('struttura')">Vai →</button></div>
+    </div>
+    <div class="agenda-row">
+      <div class="agenda-accent" style="background:var(--blue)"></div>
+      <div class="agenda-num" style="color:var(--blue)">02</div>
+      <div class="agenda-info">
+        <div class="agenda-ttl">La voce: tono, ritmo e pause</div>
+        <div class="agenda-time">0:25 – 0:55 · 30 minuti</div>
+      </div>
+      <div class="agenda-go"><button onclick="goBlock('voce')">Vai →</button></div>
+    </div>
+    <div class="agenda-row">
+      <div class="agenda-accent" style="background:var(--amber)"></div>
+      <div class="agenda-num" style="color:var(--amber)">03</div>
+      <div class="agenda-info">
+        <div class="agenda-ttl">Linguaggio del corpo e postura</div>
+        <div class="agenda-time">0:55 – 1:25 · 30 minuti</div>
+      </div>
+      <div class="agenda-go"><button onclick="goBlock('corpo')">Vai →</button></div>
+    </div>
+    <div class="agenda-row">
+      <div class="agenda-accent" style="background:var(--purple)"></div>
+      <div class="agenda-num" style="color:var(--purple)">04</div>
+      <div class="agenda-info">
+        <div class="agenda-ttl">Gestire l'ansia da prestazione</div>
+        <div class="agenda-time">1:25 – 1:55 · 30 minuti</div>
+      </div>
+      <div class="agenda-go"><button onclick="goBlock('ansia')">Vai →</button></div>
+    </div>
+
+    <div style="background:var(--navy);border-radius:var(--radius);padding:1.75rem;margin-top:2rem;text-align:center">
+      <p style="font-size:1.3rem;color:#fff;font-style:italic;line-height:1.5">"Un buon discorso non è quello perfetto.<br>È quello che arriva."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE: LEZIONE ══════════════ -->
+<div class="page" id="page-lezione">
+  <div class="container">
+    <div class="section-title">I quattro blocchi della lezione</div>
+
+    <!-- BLOCCO 1: STRUTTURA -->
+    <div class="block-card" id="block-struttura">
+      <div class="block-header" onclick="toggleBlock(this)">
+        <div class="block-num" style="background:var(--greenL);color:var(--green)">1</div>
+        <div class="block-info">
+          <div class="block-title" style="color:var(--green)">Come strutturare un discorso</div>
+          <div class="block-sub">0:00 – 0:25 · 25 minuti · La mappa prima di parlare</div>
+        </div>
+        <div class="block-chevron">▼</div>
+      </div>
+      <div class="block-body">
+        <p class="block-intro">Prima di aprire bocca, bisogna sapere dove si va. Un discorso senza struttura è come un viaggio senza cartina: si arriva da qualche parte, ma non necessariamente dove si voleva.</p>
+
+        <div class="points-grid">
+          <div class="point-card" style="background:var(--greenL);border-color:var(--green)">
+            <div class="point-label" style="color:var(--green)">L'inizio — aggancia</div>
+            <div class="point-text">Le prime 10 secondi decidono tutto. Inizia con una domanda, un dato sorprendente o una storia breve. Mai con "Allora… ehm… oggi vi parlo di…"</div>
+          </div>
+          <div class="point-card" style="background:var(--blueL);border-color:var(--blue)">
+            <div class="point-label" style="color:var(--blue)">Il corpo — spiega</div>
+            <div class="point-text">Massimo 3 punti principali. Ogni punto ha: un'idea + un esempio + una frase che lo conclude. Non di più.</div>
+          </div>
+          <div class="point-card" style="background:var(--purpleL);border-color:var(--purple)">
+            <div class="point-label" style="color:var(--purple)">La fine — lascia il segno</div>
+            <div class="point-text">L'ultima frase è quella che si ricorda di più. Riprendi l'idea iniziale, tira una conclusione netta o fai una domanda che fa riflettere.</div>
+          </div>
+          <div class="point-card" style="background:var(--amberL);border-color:var(--amber)">
+            <div class="point-label" style="color:var(--amber)">La regola del 3</div>
+            <div class="point-text">Il cervello umano ricorda facilmente le cose in gruppi di 3. "Tre motivi per cui…", "Prima… poi… infine…" — usali sempre.</div>
+          </div>
+        </div>
+
+        <div class="tip green">
+          <div class="tip-title">Esempio di apertura efficace</div>
+          <div class="tip-text">Invece di: "Oggi vi parlo dei delfini"<br>Prova: "Sapevate che i delfini hanno un nome personale e si chiamano tra loro? Oggi vi spiego perché sono gli animali più intelligenti del mare."</div>
+        </div>
+        <div class="tip amber">
+          <div class="tip-title">Strumento: il "filo rosso"</div>
+          <div class="tip-text">Prima di ogni presentazione, scrivi una sola frase che riassume tutto: "Voglio che alla fine il mio pubblico capisca che…". Se non riesci a scriverla, il discorso non è ancora pronto.</div>
+        </div>
+
+        <div class="err-table">
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Iniziare dicendo "Allora, dunque, praticamente…"</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Iniziare con un fatto, una domanda o una storia di 2 righe</div></div>
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Elencare tutto quello che si sa sull'argomento</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Scegliere solo 3 idee e svilupparle bene</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCCO 2: VOCE -->
+    <div class="block-card" id="block-voce">
+      <div class="block-header" onclick="toggleBlock(this)">
+        <div class="block-num" style="background:var(--blueL);color:var(--blue)">2</div>
+        <div class="block-info">
+          <div class="block-title" style="color:var(--blue)">La voce: tono, ritmo e pause</div>
+          <div class="block-sub">0:25 – 0:55 · 30 minuti · La voce come strumento</div>
+        </div>
+        <div class="block-chevron">▼</div>
+      </div>
+      <div class="block-body">
+        <p class="block-intro">La voce non serve solo a trasmettere parole — trasmette emozioni, sicurezza e interesse. Chi parla in modo monocorde annoia anche quando dice cose interessanti.</p>
+
+        <div class="points-grid">
+          <div class="point-card" style="background:var(--blueL);border-color:var(--blue)">
+            <div class="point-label" style="color:var(--blue)">Il volume</div>
+            <div class="point-text">Parla sempre un po' più forte di quanto pensi sia necessario. In aula, la voce si perde. Mai abbassare la voce alla fine delle frasi.</div>
+          </div>
+          <div class="point-card" style="background:var(--blueL);border-color:var(--blue)">
+            <div class="point-label" style="color:var(--blue)">Il ritmo</div>
+            <div class="point-text">Varia la velocità. Le cose importanti si dicono più lentamente. Le cose di contorno più velocemente. Una velocità costante addormenta.</div>
+          </div>
+          <div class="point-card" style="background:var(--blueL);border-color:var(--blue)">
+            <div class="point-label" style="color:var(--blue)">Le pause</div>
+            <div class="point-text">Una pausa di 2-3 secondi prima di un punto chiave crea attesa. Non riempire il silenzio con "ehm" o "tipo".</div>
+          </div>
+          <div class="point-card" style="background:var(--blueL);border-color:var(--blue)">
+            <div class="point-label" style="color:var(--blue)">Il tono</div>
+            <div class="point-text">Tono più basso e lento = argomento serio. Tono più alto e vivace = qualcosa di interessante o divertente.</div>
+          </div>
+        </div>
+
+        <div class="tip blue">
+          <div class="tip-title">Tecnica: le parole-chiave in evidenza</div>
+          <div class="tip-text">Sottolinea fisicamente le 5-6 parole più importanti del tuo testo. Quando le pronunci: rallenta, alza leggermente il volume, fai una micropausa prima. Il resto può fluire normalmente.</div>
+        </div>
+
+        <div class="quote-block">
+          <span class="quote-mark">"</span>
+          <div class="quote-text">Il problema più grande della comunicazione è l'illusione che sia avvenuta.</div>
+          <div class="quote-author">— George Bernard Shaw</div>
+        </div>
+
+        <div class="err-table">
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Parlare sempre alla stessa velocità e volume</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Rallentare sui concetti chiave, accelerare sulle parti di raccordo</div></div>
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Riempire i silenzi con "ehm", "tipo", "cioè"</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Usare la pausa come strumento: stai pensando, non sei in difficoltà</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCCO 3: CORPO -->
+    <div class="block-card" id="block-corpo">
+      <div class="block-header" onclick="toggleBlock(this)">
+        <div class="block-num" style="background:var(--amberL);color:var(--amber)">3</div>
+        <div class="block-info">
+          <div class="block-title" style="color:var(--amber)">Linguaggio del corpo e postura</div>
+          <div class="block-sub">0:55 – 1:25 · 30 minuti · Il corpo parla prima della voce</div>
+        </div>
+        <div class="block-chevron">▼</div>
+      </div>
+      <div class="block-body">
+        <p class="block-intro">Il 55% del messaggio che trasmettiamo arriva dal corpo, non dalle parole. Chi se ne sta curvo, con le braccia conserte e lo sguardo basso comunica insicurezza anche se dice cose giustissime.</p>
+
+        <div class="points-grid">
+          <div class="point-card" style="background:var(--amberL);border-color:var(--amber)">
+            <div class="point-label" style="color:var(--amber)">La postura base</div>
+            <div class="point-text">Piedi a larghezza spalle, peso distribuito. Non incrociare le braccia e non mettere le mani in tasca. Le mani libere trasmettono apertura.</div>
+          </div>
+          <div class="point-card" style="background:var(--amberL);border-color:var(--amber)">
+            <div class="point-label" style="color:var(--amber)">Il contatto visivo</div>
+            <div class="point-text">Tecnica "faro rotante": sposta lo sguardo da una persona all'altra ogni 3-4 secondi, coprendo tutta la stanza. Mai al soffitto o al pavimento.</div>
+          </div>
+          <div class="point-card" style="background:var(--amberL);border-color:var(--amber)">
+            <div class="point-label" style="color:var(--amber)">I gesti</div>
+            <div class="point-text">Le mani accompagnano le parole. "Tre punti" = mostra tre dita. "Grande/piccolo" = allarga/avvicina le mani. I gesti aiutano a visualizzare.</div>
+          </div>
+          <div class="point-card" style="background:var(--amberL);border-color:var(--amber)">
+            <div class="point-label" style="color:var(--amber)">Le slide</div>
+            <div class="point-text">Le slide sono per il pubblico, non per te. Tu parli alle persone, non allo schermo. Conosci le slide a memoria.</div>
+          </div>
+        </div>
+
+        <div class="tip green">
+          <div class="tip-title">La "power pose" (2 minuti prima)</div>
+          <div class="tip-text">Stai dritto, spalle aperte, mento leggermente alzato per 2 minuti prima di iniziare. Il corpo influenza la mente: allenare la postura aiuta a sentirsi più sicuri.</div>
+        </div>
+
+        <div class="err-table">
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Braccia conserte, spalle curve, sguardo al pavimento</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Postura aperta, contatto visivo, gesti coordinati alle parole</div></div>
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Voltarsi a leggere le slide o fissare i propri appunti</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Usare le slide come sfondo, non come copione da leggere</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCCO 4: ANSIA -->
+    <div class="block-card" id="block-ansia">
+      <div class="block-header" onclick="toggleBlock(this)">
+        <div class="block-num" style="background:var(--purpleL);color:var(--purple)">4</div>
+        <div class="block-info">
+          <div class="block-title" style="color:var(--purple)">Gestire l'ansia da prestazione</div>
+          <div class="block-sub">1:25 – 1:55 · 30 minuti · L'ansia è normale, ma si gestisce</div>
+        </div>
+        <div class="block-chevron">▼</div>
+      </div>
+      <div class="block-body">
+        <p class="block-intro">Quasi tutti i grandi oratori ammettono di avere il cuore che batte forte prima di salire sul palco. La differenza non è l'assenza di ansia — è avere strumenti per trasformarla in energia.</p>
+
+        <div class="points-grid">
+          <div class="point-card" style="background:var(--purpleL);border-color:var(--purple)">
+            <div class="point-label" style="color:var(--purple)">Capire l'ansia</div>
+            <div class="point-text">Battito accelerato, mani sudate: il corpo sta aumentando l'energia disponibile. Non è un problema — è carburante.</div>
+          </div>
+          <div class="point-card" style="background:var(--purpleL);border-color:var(--purple)">
+            <div class="point-label" style="color:var(--purple)">Il respiro 4-7-8</div>
+            <div class="point-text">Inspira 4 secondi, trattieni 7, espira 8. Ripetuto 3 volte prima di iniziare, abbassa il ritmo cardiaco in modo misurabile.</div>
+          </div>
+          <div class="point-card" style="background:var(--purpleL);border-color:var(--purple)">
+            <div class="point-label" style="color:var(--purple)">La preparazione</div>
+            <div class="point-text">Il 90% dell'ansia viene dall'incertezza. Chi conosce bene l'argomento si preoccupa molto meno. Prepararsi bene è il miglior ansiolitico.</div>
+          </div>
+          <div class="point-card" style="background:var(--purpleL);border-color:var(--purple)">
+            <div class="point-label" style="color:var(--purple)">Il pubblico non è nemico</div>
+            <div class="point-text">I compagni vogliono che tu finisca bene — per loro, non contro di te. Guardali come alleati, non come giudici.</div>
+          </div>
+        </div>
+
+        <div class="tip blue">
+          <div class="tip-title">Reframe: da "devo impressionare" a "voglio condividere"</div>
+          <div class="tip-text">Cambia la domanda: non "mi farò una bella figura?" ma "cosa voglio che i miei compagni capiscano oggi?" Il focus si sposta da te al messaggio, e l'ansia scende.</div>
+        </div>
+        <div class="tip green">
+          <div class="tip-title">Sbagliare non è catastrofe</div>
+          <div class="tip-text">Se perdi il filo: fai una pausa, respira, ricomincia dall'ultima frase. Il pubblico lo percepisce come sicurezza, non come debolezza.</div>
+        </div>
+
+        <div class="err-table">
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">"Sono emozionato/a, scusate…" — dichiarare l'ansia la amplifica</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Respirare, fare una pausa e ricominciare con calma</div></div>
+          <div class="err-row"><div class="err-tag no">NO</div><div class="err-text">Cercare di sembrare perfetti</div></div>
+          <div class="err-row"><div class="err-tag si">SÌ</div><div class="err-text si">Essere autentici e preparati — l'autenticità funziona sempre</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE: QUIZ ══════════════ -->
+<div class="page" id="page-quiz">
+  <div class="container">
+    <div class="section-title">Quiz di verifica</div>
+    <div class="quiz-wrap">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="qbar" style="width:0%"></div></div>
+      <div id="quiz-area"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE: PROVA TU ══════════════ -->
+<div class="page" id="page-prova">
+  <div class="container">
+    <div class="section-title">Prova tu!</div>
+    <div class="prova-wrap">
+      <p class="prova-intro">Metti alla prova quello che hai imparato. Scegli un argomento, poi rispondi alla domanda pratica. Il sistema controlla se hai applicato bene il concetto.</p>
+
+      <div class="select-row">
+        <label>Scegli l'argomento:</label>
+        <select id="prova-select" onchange="renderProva()">
+          <option value="apertura">Apertura efficace di un discorso</option>
+          <option value="pausa">L'uso delle pause</option>
+          <option value="postura">Postura e contatto visivo</option>
+          <option value="ansia">Gestire l'ansia prima di parlare</option>
+          <option value="struttura">La regola del 3</option>
+        </select>
+      </div>
+
+      <div id="prova-content"></div>
+
+      <div class="hints-section">
+        <div class="section-title" style="margin-top:1rem">Promemoria per ogni argomento</div>
+        <div class="hint-item"><strong>Apertura:</strong> usa una domanda, un dato sorprendente o una storia di 2 righe. Mai iniziare con "Allora…"</div>
+        <div class="hint-item"><strong>Pause:</strong> 2-3 secondi prima di un punto chiave. Non riempire il silenzio con "ehm" o "tipo".</div>
+        <div class="hint-item"><strong>Postura:</strong> piedi a larghezza spalle, braccia aperte, "faro rotante" con gli occhi ogni 3-4 secondi.</div>
+        <div class="hint-item"><strong>Ansia:</strong> tecnica 4-7-8, focus sul messaggio (non su di te), pubblica come alleato.</div>
+        <div class="hint-item"><strong>Regola del 3:</strong> "Prima… poi… infine…" oppure "Tre motivi per cui…" — il cervello lo ricorda facilmente.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE: SFIDE ══════════════ -->
+<div class="page" id="page-sfide">
+  <div class="container">
+    <div class="section-title">Sfide creative</div>
+    <p style="font-family:sans-serif;font-size:15px;color:var(--textM);margin-bottom:1.5rem;line-height:1.7">Metti alla prova la tua creatività con queste sfide pratiche. Puoi farle da solo o con i compagni.</p>
+    <div class="sfide-grid">
+      <div class="sfida-card">
+        <div class="sfida-icon">🎤</div>
+        <div class="sfida-title">Il mini-discorso</div>
+        <div class="sfida-text">Prepara 60 secondi su un argomento che ami. Struttura: apertura a effetto + 2 idee principali + conclusione netta. Cronometrati!</div>
+      </div>
+      <div class="sfida-card">
+        <div class="sfida-icon">🔇</div>
+        <div class="sfida-title">La pausa strategica</div>
+        <div class="sfida-text">Recita un testo a voce alta e inserisci 3 pause deliberate prima delle parole più importanti. Registrati e riascolta: le senti?</div>
+      </div>
+      <div class="sfida-card">
+        <div class="sfida-icon">📢</div>
+        <div class="sfida-title">Lo spot pubblicitario</div>
+        <div class="sfida-text">Inventa uno slogan per un prodotto immaginario. Deve contenere: una domanda retorica + un'iperbole + un invito all'azione. Max 3 frasi.</div>
+      </div>
+      <div class="sfida-card">
+        <div class="sfida-icon">🪞</div>
+        <div class="sfida-title">Allo specchio</div>
+        <div class="sfida-text">Parla di fronte a uno specchio per 2 minuti. Osserva: dove vanno le mani? Guardi in alto? Le spalle sono dritte? Nota 3 cose da migliorare.</div>
+      </div>
+      <div class="sfida-card">
+        <div class="sfida-icon">🎵</div>
+        <div class="sfida-title">Nella canzone</div>
+        <div class="sfida-text">Pensa a una canzone che conosci a memoria. Cantala mentalmente e identifica almeno un momento in cui l'artista usa pause, variazioni di ritmo o enfasi sulla voce.</div>
+      </div>
+      <div class="sfida-card">
+        <div class="sfida-icon">⚡</div>
+        <div class="sfida-title">Il "filo rosso"</div>
+        <div class="sfida-text">Scegli un argomento a caso (un animale, un film, una città). Scrivi in una riga sola il messaggio centrale. Poi costruisci 3 punti che lo supportano.</div>
+      </div>
+    </div>
+
+    <div style="background:var(--navy);border-radius:var(--radius);padding:1.5rem;margin-top:2rem;text-align:center">
+      <p style="font-size:15px;color:rgba(255,255,255,0.7);font-family:sans-serif;line-height:1.7">
+        <strong style="color:#fff">Compito per casa:</strong><br>
+        Prepara 60 secondi su un argomento a tua scelta e presentalo alla prossima lezione.<br>
+        Usa almeno una delle tecniche che hai imparato oggi.
+      </p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Lezione sull'eloquio · Scuola Media · File offline — nessuna connessione necessaria
+</footer>
+
+<script>
+// ── NAVIGATION ──
+function goPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'quiz') renderQuiz();
+  if (name === 'prova') renderProva();
+}
+
+function goBlock(id) {
+  goPage('lezione', document.querySelector('.nav-btn:nth-child(2)'));
+  setTimeout(() => {
+    const el = document.getElementById('block-' + id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const body = el.querySelector('.block-body');
+      const chev = el.querySelector('.block-chevron');
+      if (!body.classList.contains('open')) {
+        body.classList.add('open');
+        chev.classList.add('open');
+      }
+    }
+  }, 100);
+}
+
+// ── ACCORDION ──
+function toggleBlock(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.block-chevron');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+// ── QUIZ ──
+const quizData = [
+  {
+    q: 'Qual è la tecnica migliore per aprire un discorso in modo efficace?',
+    opts: ['Presentarsi e dire l\'argomento', 'Fare una domanda o raccontare un fatto sorprendente', 'Ringraziare il pubblico per l\'attenzione', 'Spiegare quanto è lungo il discorso'],
+    ans: 1,
+    exp: 'Corretto! Aprire con una domanda o un dato sorprendente cattura subito l\'attenzione. Presentarsi o ringraziare il pubblico sono modi "piatti" che non creano aspettativa.'
+  },
+  {
+    q: 'Perché non bisogna abbassare la voce alla fine delle frasi?',
+    opts: ['Perché fa sembrare nervosi', 'Perché la parola più importante è spesso alla fine della frase', 'Perché il pubblico potrebbe non sentire', 'Tutte le risposte sono corrette'],
+    ans: 3,
+    exp: 'Esatto! Tutte e tre le ragioni sono valide: abbassare la voce alla fine fa sembrare insicuri, rischia di far perdere le parole chiave e rende il messaggio meno incisivo.'
+  },
+  {
+    q: 'Cosa significa la "regola del 3" nel parlare in pubblico?',
+    opts: ['Bisogna parlare per almeno 3 minuti', 'Il cervello ricorda meglio le informazioni raggruppate in tre', 'Si possono fare al massimo 3 errori', 'Bisogna fare 3 pause per discorso'],
+    ans: 1,
+    exp: 'Giusto! Il cervello umano tende a ricordare meglio le informazioni organizzate in gruppi di tre. Ecco perché "prima… poi… infine" funziona così bene.'
+  },
+  {
+    q: 'Un ragazzo prima di una presentazione ha il cuore che batte forte. Cosa deve pensare?',
+    opts: ['"Sto per fare una figura terribile"', '"Devo calmarmi a tutti i costi"', '"Il mio corpo sta aumentando l\'energia disponibile — è carburante"', '"Dovrei fingere di non essere emozionato"'],
+    ans: 2,
+    exp: 'Bravo! L\'ansia fisiologica (battito accelerato, adrenalina) è il corpo che si prepara a dare il meglio. Reinterpretarla come energia invece che come paura cambia tutto.'
+  },
+  {
+    q: 'Cos\'è la tecnica del "faro rotante"?',
+    opts: ['Muoversi avanti e indietro mentre si parla', 'Spostarsi da un lato all\'altro del palco', 'Cambiare persona con lo sguardo ogni 3-4 secondi coprendo tutta la stanza', 'Puntare una torcia verso il soffitto'],
+    ans: 2,
+    exp: 'Esatto! Il "faro rotante" consiste nello spostare lo sguardo da una persona all\'altra ogni 3-4 secondi, così da includere tutta la stanza e mantenere alto il coinvolgimento.'
+  },
+  {
+    q: 'Perché le pause sono utili nel parlato?',
+    opts: ['Per ricordare cosa dire dopo', 'Creano attesa prima dei punti importanti e mostrano controllo', 'Per far capire al pubblico che si è finito', 'Non sono utili, vanno evitate'],
+    ans: 1,
+    exp: 'Corretto! La pausa strategica crea suspense prima di un concetto chiave e comunica controllo e sicurezza. Chi la usa non sembra bloccato — sembra padrone della situazione.'
+  },
+  {
+    q: 'Cosa si intende con il "filo rosso" di un discorso?',
+    opts: ['La frase di apertura più creativa', 'Il messaggio centrale che tutto il discorso deve sostenere', 'L\'elenco dei punti da trattare', 'La conclusione del discorso'],
+    ans: 1,
+    exp: 'Giusto! Il "filo rosso" è il messaggio centrale: la frase che potresti scrivere prima di iniziare — "voglio che il pubblico capisca che…". Se non riesci a scriverla, il discorso non è ancora pronto.'
+  },
+  {
+    q: 'Cosa NON bisogna fare se si perde il filo durante una presentazione?',
+    opts: ['Fare una pausa e respirare', 'Ricominciare dall\'ultima frase pronunciata', 'Dire "mi scusate, sono emozionato"', 'Guardare brevemente i propri appunti'],
+    ans: 2,
+    exp: 'Corretto! Dichiarare pubblicamente di essere emozionato amplifica l\'ansia e può imbarazzare. Molto meglio una pausa silenziosa e ricominciare: il pubblico lo legge come sicurezza.'
+  }
+];
+
+let qIdx = 0, score = 0, answered = false;
+
+function renderQuiz() {
+  qIdx = 0; score = 0; answered = false;
+  showQuestion();
+}
+
+function showQuestion() {
+  const area = document.getElementById('quiz-area');
+  const pct = Math.round((qIdx / quizData.length) * 100);
+  document.getElementById('qbar').style.width = pct + '%';
+
+  if (qIdx >= quizData.length) {
+    const emoji = score >= 7 ? '🏆' : score >= 5 ? '👍' : '📚';
+    const msg = score >= 7
+      ? 'Fantastico! Hai capito benissimo tutti i concetti della lezione.'
+      : score >= 5
+      ? 'Bene! Ripassando un paio di punti diventerai un esperto.'
+      : 'Continua a studiare — rileggi la lezione e riprova!';
+    area.innerHTML = `
+      <div class="quiz-result">
+        <div class="result-emoji">${emoji}</div>
+        <div class="result-score">${score} / ${quizData.length}</div>
+        <div class="result-msg">${msg}</div>
+        <button class="btn-retry" onclick="renderQuiz()">Riprova il quiz</button>
+      </div>`;
+    document.getElementById('qbar').style.width = '100%';
+    return;
+  }
+
+  const d = quizData[qIdx];
+  answered = false;
+  area.innerHTML = `
+    <div class="quiz-counter">Domanda ${qIdx + 1} di ${quizData.length}</div>
+    <div class="quiz-q">
+      <div class="quiz-question">${d.q}</div>
+      <div class="quiz-options">
+        ${d.opts.map((o, i) => `<button class="quiz-opt" id="opt${i}" onclick="selectOpt(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfeed"></div>
+      <div class="quiz-nav">
+        <div class="quiz-score">Punteggio: ${score}</div>
+        <button class="btn-next" id="btn-next" onclick="nextQ()">Prossima domanda →</button>
+      </div>
+    </div>`;
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const d = quizData[qIdx];
+  for (let j = 0; j < d.opts.length; j++) {
+    const b = document.getElementById('opt' + j);
+    b.disabled = true;
+    if (j === d.ans) b.classList.add('correct');
+    else if (j === i) b.classList.add('wrong');
+  }
+  const feed = document.getElementById('qfeed');
+  feed.classList.add('show');
+  if (i === d.ans) {
+    score++;
+    feed.classList.add('ok');
+    feed.innerHTML = '✓ ' + d.exp;
+  } else {
+    feed.classList.add('ko');
+    feed.innerHTML = '✗ ' + d.exp;
+  }
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function nextQ() { qIdx++; showQuestion(); }
+
+// ── PROVA TU ──
+const provaData = {
+  apertura: {
+    domanda: 'Scrivi l\'apertura di un discorso sui videogiochi. Deve essere a effetto — NON iniziare con "Oggi vi parlo di…"',
+    check: (txt) => {
+      const bad = /oggi vi parlo|allora|dunque|parlo di|vorrei parlarvi/i.test(txt);
+      const good = txt.length > 30;
+      return { ok: good && !bad, msg: good && !bad
+        ? '✓ Ottimo! La tua apertura non usa la formula banale. Ricorda: domanda, dato sorprendente o storia breve funzionano meglio.'
+        : '✗ Riprova! Evita "Oggi vi parlo di…" o "Allora…". Prova con una domanda: "Sapete quante ore al giorno i ragazzi giocano in media?"'
+      };
+    }
+  },
+  pausa: {
+    domanda: 'Scrivi una frase di 15-20 parole su qualsiasi argomento. Poi metti [PAUSA] nel punto in cui useresti la pausa strategica.',
+    check: (txt) => {
+      const hasPausa = /\[pausa\]/i.test(txt);
+      return { ok: hasPausa, msg: hasPausa
+        ? '✓ Perfetto! Hai inserito la pausa. Nella realtà, quel momento di silenzio crea attesa e fa capire che sta arrivando qualcosa di importante.'
+        : '✗ Non hai inserito [PAUSA] nel testo. Riscrivila e metti [PAUSA] prima della parola o del concetto più importante della frase.'
+      };
+    }
+  },
+  postura: {
+    domanda: 'Elenca 3 cose concrete che faresti con il corpo durante una presentazione per sembrare sicuro.',
+    check: (txt) => {
+      const words = txt.trim().split(/\s+/).length;
+      const ok = words >= 12;
+      return { ok, msg: ok
+        ? '✓ Bene! Hai descritto azioni concrete. I tre pilastri da ricordare: postura aperta, faro rotante con gli occhi, gesti che accompagnano le parole.'
+        : '✗ Dai più dettagli! Scrivi almeno 3 cose concrete — ad esempio: come posizionare i piedi, dove guardare, cosa fare con le mani.'
+      };
+    }
+  },
+  ansia: {
+    domanda: 'Un tuo compagno ti dice "ho una paura tremenda di parlare davanti alla classe". Cosa gli diresti usando quello che hai imparato?',
+    check: (txt) => {
+      const good = txt.length > 60;
+      return { ok: good, msg: good
+        ? '✓ Ottima risposta! I punti chiave: l\'ansia è energia, la tecnica 4-7-8 aiuta, il pubblico non è nemico, e concentrarsi sul messaggio invece che su se stessi riduce la paura.'
+        : '✗ Sviluppa di più la risposta. Cosa diresti concretamente? Pensa alla tecnica del respiro, al reframe dell\'ansia e al consiglio sul pubblico.'
+      };
+    }
+  },
+  struttura: {
+    domanda: 'Struttura in 3 punti un mini-discorso sul perché è importante fare sport. Usa la formula: Prima… / Poi… / Infine…',
+    check: (txt) => {
+      const hasTre = /prima|poi|infine/i.test(txt);
+      return { ok: hasTre, msg: hasTre
+        ? '✓ Perfetto! Hai usato la struttura in 3 punti. Il cervello del pubblico ti ringrazierà — questa formula rende il discorso facile da seguire e ricordare.'
+        : '✗ Non hai usato la struttura "Prima… Poi… Infine…". Riprova organizzando i 3 punti con queste parole — è importante che il pubblico percepisca la progressione.'
+      };
+    }
+  }
+};
+
+function renderProva() {
+  const key = document.getElementById('prova-select').value;
+  const d = provaData[key];
+  const c = document.getElementById('prova-content');
+  c.innerHTML = `
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow)">
+      <p style="font-family:sans-serif;font-size:15px;font-weight:600;color:var(--textD);margin-bottom:1rem;line-height:1.5">${d.domanda}</p>
+      <textarea id="prova-input" placeholder="Scrivi qui la tua risposta…"></textarea>
+      <br>
+      <button class="btn-check" onclick="checkProva('${key}')">Controlla risposta</button>
+      <div class="prova-result" id="prova-result"></div>
+    </div>`;
+}
+
+function checkProva(key) {
+  const txt = document.getElementById('prova-input').value.trim();
+  const res = document.getElementById('prova-result');
+  if (!txt) { res.innerHTML = 'Scrivi prima la tua risposta!'; res.className = 'prova-result show ko'; return; }
+  const { ok, msg } = provaData[key].check(txt);
+  res.className = 'prova-result show ' + (ok ? 'ok' : 'ko');
+  res.innerHTML = msg;
+}
+
+// ── INIT ──
+renderProva();
+</script>
+</body>
+</html>
